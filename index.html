@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo de Tasas en Vivo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .contenedor-principal {
+            background: rgba(30, 41, 59, 0.4);
+            padding: 40px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .titulo-banco {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .grid-tasas {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-tasas { grid-template-columns: 1fr; }
+        }
+
+        .tarjeta-moneda {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 24px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .moneda-nombre {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .dolar-color { color: #38bdf8; }
+        .euro-color { color: #a78bfa; }
+        .usdt-color { color: #f59e0b; }
+
+        .precio {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: #34d399;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-principal">
+        <div class="titulo-banco">Monitoreo de Divisas y Cripto</div>
+        
+        <div class="grid-tasas">
+            <div class="tarjeta-moneda">
+                <div class="moneda-nombre dolar-color">Dólar BCV</div>
+                <div class="precio" id="bcvUSD">Cargando...</div>
+            </div>
+
+            <div class="tarjeta-moneda">
+                <div class="moneda-nombre euro-color">Euro BCV</div>
+                <div class="precio" id="bcvEUR">Cargando...</div>
+            </div>
+
+            <div class="tarjeta-moneda">
+                <div class="moneda-nombre usdt-color">Binance USDT</div>
+                <div class="precio" id="binanceUSDT">Cargando...</div>
+            </div>
+        </div>
+
+        <div class="status">● Sincronizado automáticamente en vivo</div>
+    </div>
+
+    <script>
+        async function obtenerDatosEnVivo() {
+            // 1. Traer Dólar y Euro oficiales exactos de la API de CriptoYa
+            try {
+                const res = await fetch('https://criptoya.com/api/bcv');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('bcvUSD').innerText = parseFloat(data.usd).toFixed(2) + ' Bs';
+                    document.getElementById('bcvEUR').innerText = parseFloat(data.eur).toFixed(2) + ' Bs';
+                }
+            } catch (error) {
+                document.getElementById('bcvUSD').innerText = "Error";
+                document.getElementById('bcvEUR').innerText = "Error";
+            }
+
+            // 2. Traer USDT P2P real de Binance de CriptoYa
+            try {
+                const resUsdt = await fetch('https://criptoya.com/api/binancep2p/ves/usdt/100');
+                if (resUsdt.ok) {
+                    const dataUsdt = await resUsdt.json();
+                    if (dataUsdt && dataUsdt.ask) {
+                        document.getElementById('binanceUSDT').innerText = parseFloat(dataUsdt.ask).toFixed(2) + ' Bs';
+                    }
+                }
+            } catch (error) {
+                document.getElementById('binanceUSDT').innerText = "Error";
+            }
+        }
+
+        // Ejecutar al cargar la página
+        obtenerDatosEnVivo();
+    </script>
+</body>
+</html>
